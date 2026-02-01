@@ -1,0 +1,5 @@
+{
+  "name": "BetBot AI - 24/7 Sports Analyst",
+  "description": "An advanced sports betting simulator that uses Gemini AI to scan live game statistics, calculate high-probability outcomes, and automate virtual betting strategies 24/7.",
+  "requestFramePermissions": []
+}
