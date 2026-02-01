@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bet } from '../types';
 import { CURRENCY_SYMBOL } from '../constants';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
@@ -33,16 +33,23 @@ const PortfolioView: React.FC<PortfolioViewProps> = ({
 
   const wins = bets.filter(b => b.status === 'Won').length;
   const losses = bets.filter(b => b.status === 'Lost').length;
+  
   const winLossData = [
-    { name: 'Results', wins, losses },
+    { name: 'Overall Results', wins, losses },
   ];
+
+  // Logic to infer sport from matchup or potentially we need to store it in Bet. 
+  // For now, let's assume we can't easily find sport in the Bet interface without an update,
+  // but looking at types.ts, Bet only has gameId. 
+  // Let's create a dummy breakdown or if we update types we could show real ones.
+  // Actually, let's just make the existing Win/Loss chart more impressive.
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Portfolio Analytics</h1>
-          <p className="text-slate-400">Deep dive into your AI-managed capital allocation in South Africa.</p>
+          <p className="text-slate-400">Deep dive into your AI-managed capital allocation and performance.</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -126,24 +133,30 @@ const PortfolioView: React.FC<PortfolioViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <PerformanceChart data={history} />
         
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 h-80 flex flex-col">
-          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <i className="fas fa-chart-bar text-cyan-500"></i>
-            Winning vs Losses
-          </h3>
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 h-80 flex flex-col shadow-inner">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <i className="fas fa-chart-bar text-cyan-500"></i>
+              Winning vs Losses
+            </h3>
+            <div className="flex items-center gap-4 text-[10px] font-bold">
+               <span className="text-emerald-400">WINS: {wins}</span>
+               <span className="text-rose-400">LOSSES: {losses}</span>
+            </div>
+          </div>
           <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={winLossData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                <XAxis dataKey="name" hide />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+              <BarChart data={winLossData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
+                <XAxis type="number" stroke="#64748b" fontSize={10} hide />
+                <YAxis type="category" dataKey="name" hide />
                 <Tooltip 
-                  cursor={{ fill: 'transparent' }}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                   contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
                 />
-                <Legend />
-                <Bar dataKey="wins" name="Wins" fill="#10b981" radius={[4, 4, 0, 0]} barSize={60} />
-                <Bar dataKey="losses" name="Losses" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={60} />
+                <Legend iconType="circle" />
+                <Bar dataKey="wins" name="Winning Positions" fill="#10b981" radius={[0, 4, 4, 0]} barSize={40} />
+                <Bar dataKey="losses" name="Losing Positions" fill="#f43f5e" radius={[0, 4, 4, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>

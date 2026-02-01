@@ -48,6 +48,13 @@ const App: React.FC = () => {
 
   const winCount = useMemo(() => bets.filter(b => b.status === 'Won').length, [bets]);
   const lossCount = useMemo(() => bets.filter(b => b.status === 'Lost').length, [bets]);
+  
+  const recentStreak = useMemo(() => {
+    return bets
+      .filter(b => b.status !== 'Open')
+      .slice(0, 10)
+      .map(b => b.status);
+  }, [bets]);
 
   // Sync balance state to currentUser object and persist to localStorage
   useEffect(() => {
@@ -495,7 +502,27 @@ const App: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <StatsCard label="Balance" value={`${CURRENCY_SYMBOL}${balance.toLocaleString()}`} icon="fa-wallet" color="bg-emerald-500" trend={`${((profitLoss/INITIAL_BALANCE)*100).toFixed(1)}%`} trendUp={profitLoss >= 0} />
-              <StatsCard label="Performance (W-L)" value={`${winCount} - ${lossCount}`} icon="fa-trophy" color="bg-amber-500" trend={`${winRate.toFixed(1)}% SR`} trendUp={winRate >= 50} />
+              
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between">
+                <div>
+                  <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Winning vs Losses</p>
+                  <h3 className="text-2xl font-bold text-white tracking-tight flex items-baseline gap-2">
+                    <span className="text-emerald-400">{winCount}</span>
+                    <span className="text-slate-600 text-sm">/</span>
+                    <span className="text-rose-400">{lossCount}</span>
+                  </h3>
+                </div>
+                <div className="mt-3 flex gap-1">
+                  {recentStreak.length === 0 ? (
+                    <span className="text-[10px] text-slate-600 italic">No recent results</span>
+                  ) : (
+                    recentStreak.map((status, i) => (
+                      <div key={i} className={`w-2 h-2 rounded-full ${status === 'Won' ? 'bg-emerald-500' : 'bg-rose-500'} shadow-[0_0_8px_rgba(0,0,0,0.5)]`} title={status} />
+                    ))
+                  )}
+                </div>
+              </div>
+
               <StatsCard label="Net Worth" value={`${CURRENCY_SYMBOL}${totalEquity.toLocaleString()}`} icon="fa-layer-group" color="bg-cyan-500" />
               <StatsCard label="Hit Rate" value={`${winRate.toFixed(1)}%`} icon="fa-bullseye" color="bg-indigo-500" />
             </div>
